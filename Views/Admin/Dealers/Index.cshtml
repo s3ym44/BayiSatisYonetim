@@ -1,0 +1,76 @@
+@model List<DealerListViewModel>
+@{
+    ViewData["Title"] = "Bayi Yönetimi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-building"></i> Bayi Yönetimi</h4>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Yeni Bayi</a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small">Durum</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">Tümü</option>
+                    <option value="Pending" selected="@(ViewBag.CurrentStatus?.ToString() == "Pending")">Beklemede</option>
+                    <option value="Approved" selected="@(ViewBag.CurrentStatus?.ToString() == "Approved")">Onaylı</option>
+                    <option value="Rejected" selected="@(ViewBag.CurrentStatus?.ToString() == "Rejected")">Reddedildi</option>
+                    <option value="Suspended" selected="@(ViewBag.CurrentStatus?.ToString() == "Suspended")">Askıya Alındı</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small">Arama</label>
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Firma adı, isim veya e-posta..." value="@ViewBag.CurrentSearch" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-search"></i> Filtrele</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Firma Adı</th><th>Yetkili</th><th>E-posta</th><th>Şehir</th>
+                        <th>Komisyon</th><th>Satış</th><th>Durum</th><th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model)
+                    {
+                        <tr>
+                            <td><strong>@d.CompanyName</strong></td>
+                            <td>@d.FullName</td>
+                            <td>@d.Email</td>
+                            <td>@d.City</td>
+                            <td>%@d.CommissionRate</td>
+                            <td><span class="badge bg-info">@d.SalesCount</span></td>
+                            <td>
+                                @switch (d.Status)
+                                {
+                                    case DealerStatus.Pending: <span class="badge bg-warning">Beklemede</span> break;
+                                    case DealerStatus.Approved: <span class="badge bg-success">Onaylı</span> break;
+                                    case DealerStatus.Rejected: <span class="badge bg-danger">Reddedildi</span> break;
+                                    case DealerStatus.Suspended: <span class="badge bg-secondary">Askıda</span> break;
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Detail" asp-route-id="@d.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@d.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<p class="text-muted small mt-2">Toplam @Model.Count bayi listeleniyor.</p>

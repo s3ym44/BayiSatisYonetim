@@ -1,0 +1,82 @@
+:root {
+    --primary: #2563eb;
+    --sidebar-dark: #1e293b;
+    --sidebar-dealer: #0f4c75;
+}
+
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html { font-size: 16px; }
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8fafc;
+    color: #334155;
+    margin-bottom: 60px;
+}
+
+.btn:focus, .btn:active:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(37, 99, 235, 0.4);
+}
+
+.card {
+    border-radius: 12px;
+    transition: transform 0.15s ease;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+}
+
+.nav-link.active {
+    font-weight: 600;
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.alert {
+    border: none;
+    border-radius: 10px;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}

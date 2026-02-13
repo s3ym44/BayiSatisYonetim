@@ -1,0 +1,51 @@
+@model List<Announcement>
+@{
+    ViewData["Title"] = "Duyurular";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-megaphone"></i> Duyurular</h4>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Yeni Duyuru</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Başlık</th><th>Hedef</th><th>Pop-up</th><th>Durum</th><th>Tarih</th><th>İşlem</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td><strong>@a.Title</strong></td>
+                            <td>
+                                @switch (a.TargetRole)
+                                {
+                                    case AnnouncementTarget.All: <span class="badge bg-primary">Herkes</span> break;
+                                    case AnnouncementTarget.DealersOnly: <span class="badge bg-info">Bayiler</span> break;
+                                    case AnnouncementTarget.CustomersOnly: <span class="badge bg-warning">Müşteriler</span> break;
+                                }
+                            </td>
+                            <td>@(a.IsPopup ? "Evet" : "Hayır")</td>
+                            <td>
+                                @if (a.IsActive) { <span class="badge bg-success">Aktif</span> }
+                                else { <span class="badge bg-secondary">Pasif</span> }
+                            </td>
+                            <td>@a.CreatedAt.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@a.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="Delete" asp-route-id="@a.Id" method="post" class="d-inline" onsubmit="return confirm('Bu duyuruyu silmek istediğinize emin misiniz?')">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,76 @@
+@model List<ProductListViewModel>
+@{
+    ViewData["Title"] = "Ürün Yönetimi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-box-seam"></i> Ürün Yönetimi</h4>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Yeni Ürün</a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small">Kategori</label>
+                <select name="categoryId" class="form-select form-select-sm" asp-items="ViewBag.Categories as SelectList">
+                    <option value="">Tümü</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Firma</label>
+                <select name="companyId" class="form-select form-select-sm" asp-items="ViewBag.Companies as SelectList">
+                    <option value="">Tümü</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Arama</label>
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Ürün adı..." value="@ViewBag.CurrentSearch" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-search"></i> Filtrele</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Ürün Adı</th><th>Kategori</th><th>Firma</th><th>Hız</th><th>Kota</th><th>Fiyat</th><th>Süre</th><th>Durum</th><th>İşlem</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td><strong>@p.Name</strong></td>
+                            <td><span class="badge bg-info">@p.CategoryName</span></td>
+                            <td>@p.CompanyName</td>
+                            <td>@(p.Speed ?? "-")</td>
+                            <td>@(p.Quota ?? "-")</td>
+                            <td><strong>@p.Price.ToString("N0") ₺</strong>/ay</td>
+                            <td>@(p.ContractDuration.HasValue ? $"{p.ContractDuration} ay" : "-")</td>
+                            <td>
+                                @if (p.IsActive)
+                                {
+                                    <span class="badge bg-success">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Pasif</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<p class="text-muted small mt-2">Toplam @Model.Count ürün listeleniyor.</p>

@@ -1,0 +1,53 @@
+@model ProfileEditViewModel
+@{
+    ViewData["Title"] = "Profilim";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<h4 class="mb-4"><i class="bi bi-person-gear"></i> Profil Bilgilerim</h4>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="FullName" class="form-label"></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" readonly />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="TCKimlik" class="form-label"></label>
+                    <input asp-for="TCKimlik" class="form-control" maxlength="11" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label asp-for="Address" class="form-label"></label>
+                    <input asp-for="Address" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="City" class="form-label"></label>
+                    <input asp-for="City" class="form-control" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="BirthDate" class="form-label"></label>
+                    <input asp-for="BirthDate" class="form-control" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Kaydet</button>
+        </form>
+    </div>
+</div>

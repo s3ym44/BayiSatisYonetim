@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Onay Bekleniyor";
+    Layout = "~/Views/Shared/_DealerLayout.cshtml";
+}
+
+<div class="text-center py-5">
+    <i class="bi bi-hourglass-split text-warning" style="font-size:5rem"></i>
+    <h3 class="mt-3">Hesabınız Onay Bekliyor</h3>
+    <p class="text-muted">Bayi hesabınız henüz yönetici tarafından onaylanmamıştır.</p>
+    <p class="text-muted">Durum: <strong class="text-warning">@ViewBag.DealerStatus</strong></p>
+    <p class="text-muted">Onay sürecini hızlandırmak için lütfen yönetici ile iletişime geçiniz.</p>
+    <form asp-controller="Account" asp-action="Logout" method="post" class="mt-3">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</button>
+    </form>
+</div>

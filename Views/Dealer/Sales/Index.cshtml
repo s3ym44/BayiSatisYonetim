@@ -1,0 +1,82 @@
+@model List<SaleListItem>
+@{
+    ViewData["Title"] = "Satışlarım & Primler";
+    Layout = "~/Views/Shared/_DealerLayout.cshtml";
+}
+
+<h4 class="mb-4"><i class="bi bi-cash-stack"></i> Satışlarım & Primler</h4>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <h3 class="text-primary mb-0">@(((decimal)ViewBag.TotalAmount).ToString("N0")) ₺</h3>
+            <small class="text-muted">Toplam Satış Tutarı</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <h3 class="text-success mb-0">@(((decimal)ViewBag.TotalCommission).ToString("N0")) ₺</h3>
+            <small class="text-muted">Toplam Komisyon</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <h3 class="text-warning mb-0">@(((decimal)ViewBag.PendingCommission).ToString("N0")) ₺</h3>
+            <small class="text-muted">Bekleyen Komisyon</small>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small">Komisyon Durumu</label>
+                <select name="commissionStatus" class="form-select form-select-sm">
+                    <option value="">Tümü</option>
+                    <option value="Pending">Beklemede</option>
+                    <option value="Paid">Ödendi</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-search"></i> Filtrele</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Başvuru No</th><th>Ürün</th><th>Müşteri</th><th>Satış Tarihi</th><th>Tutar</th><th>Komisyon</th><th>Durum</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td><strong>@s.ApplicationNumber</strong></td>
+                            <td>@s.ProductName</td>
+                            <td>@s.CustomerName</td>
+                            <td>@s.SaleDate.ToString("dd.MM.yyyy")</td>
+                            <td><strong>@s.Amount.ToString("N0") ₺</strong></td>
+                            <td><strong class="text-success">@s.CommissionAmount.ToString("N0") ₺</strong></td>
+                            <td>
+                                @if (s.CommissionStatus == CommissionStatus.Paid)
+                                {
+                                    <span class="badge bg-success">Ödendi</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Beklemede</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<p class="text-muted small mt-2">Toplam @Model.Count satış kaydı.</p>

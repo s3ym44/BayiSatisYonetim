@@ -1,0 +1,156 @@
+@model CustomerDashboardVM
+@{
+    ViewData["Title"] = "Müşteri Dashboard";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Hoş Geldiniz, @Model.FullName</h4>
+        <small class="text-muted">Müşteri Paneli</small>
+    </div>
+    <a asp-controller="CustomerApplication" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Yeni Başvuru</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Toplam Başvuru</p>
+                        <h3 class="mb-0">@Model.TotalApplications</h3>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 rounded-3 p-3"><i class="bi bi-file-earmark-text text-primary fs-4"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Beklemede</p>
+                        <h3 class="mb-0 text-warning">@Model.PendingApplications</h3>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 rounded-3 p-3"><i class="bi bi-clock text-warning fs-4"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Onaylanan</p>
+                        <h3 class="mb-0 text-primary">@Model.ApprovedApplications</h3>
+                    </div>
+                    <div class="bg-info bg-opacity-10 rounded-3 p-3"><i class="bi bi-check2-circle text-info fs-4"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Tamamlanan</p>
+                        <h3 class="mb-0 text-success">@Model.CompletedApplications</h3>
+                    </div>
+                    <div class="bg-success bg-opacity-10 rounded-3 p-3"><i class="bi bi-check-circle text-success fs-4"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-clock-history"></i> Son Başvurularım</h6>
+                <a asp-controller="CustomerApplication" asp-action="Index" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light"><tr><th>Başvuru No</th><th>Ürün</th><th>Durum</th><th>Tarih</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var app in Model.RecentApplications)
+                            {
+                                <tr>
+                                    <td><strong>@app.ApplicationNumber</strong></td>
+                                    <td>@app.ProductName</td>
+                                    <td>
+                                        @switch (app.Status)
+                                        {
+                                            case "Pending": <span class="badge bg-warning">Beklemede</span> break;
+                                            case "InReview": <span class="badge bg-info">İnceleniyor</span> break;
+                                            case "Approved": <span class="badge bg-primary">Onaylandı</span> break;
+                                            case "Rejected": <span class="badge bg-danger">Reddedildi</span> break;
+                                            case "Completed": <span class="badge bg-success">Tamamlandı</span> break;
+                                            default: <span class="badge bg-secondary">@app.Status</span> break;
+                                        }
+                                    </td>
+                                    <td>@app.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                    <td><a asp-controller="CustomerApplication" asp-action="Detail" asp-route-id="@app.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+                                </tr>
+                            }
+                            @if (!Model.RecentApplications.Any())
+                            {
+                                <tr><td colspan="5" class="text-center text-muted py-4">Henüz başvurunuz bulunmuyor.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h6 class="mb-0"><i class="bi bi-megaphone"></i> Duyurular</h6></div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    @foreach (var ann in Model.Announcements)
+                    {
+                        <li class="list-group-item">
+                            <strong>@ann.Title</strong>
+                            <p class="mb-0 small text-muted">@ann.Content</p>
+                            <small class="text-muted">@ann.CreatedAt.ToString("dd.MM.yyyy")</small>
+                        </li>
+                    }
+                    @if (!Model.Announcements.Any())
+                    {
+                        <li class="list-group-item text-muted text-center py-4">Duyuru bulunmuyor.</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Announcements.Any(a => a.IsPopup))
+{
+    <div class="modal fade" id="announcementModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="bi bi-megaphone"></i> Duyuru</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            @foreach (var ann in Model.Announcements.Where(a => a.IsPopup))
+            {
+                <h6>@ann.Title</h6>
+                <p>@ann.Content</p>
+                <hr />
+            }
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Tamam</button></div>
+    </div></div></div>
+}
+
+@section Scripts {
+@if (Model.Announcements.Any(a => a.IsPopup))
+{
+    <script>new bootstrap.Modal(document.getElementById('announcementModal')).show();</script>
+}
+}

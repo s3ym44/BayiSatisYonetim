@@ -1,0 +1,172 @@
+@model DealerDashboardVM
+@{
+    ViewData["Title"] = "Bayi Dashboard";
+    Layout = "~/Views/Shared/_DealerLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Hoş Geldiniz, @Model.CompanyName</h4>
+        <small class="text-muted">Bayi Paneli</small>
+    </div>
+    <a asp-controller="DealerApplication" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Yeni Başvuru</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Toplam Başvuru</p>
+                        <h3 class="mb-0">@Model.TotalApplications</h3>
+                        <small class="text-warning">@Model.PendingApplications beklemede</small>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 rounded-3 p-3"><i class="bi bi-file-earmark-text text-primary fs-4"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Tamamlanan</p>
+                        <h3 class="mb-0">@Model.CompletedApplications</h3>
+                        <small class="text-success">@Model.TotalSales satış</small>
+                    </div>
+                    <div class="bg-success bg-opacity-10 rounded-3 p-3"><i class="bi bi-check-circle text-success fs-4"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Toplam Gelir</p>
+                        <h3 class="mb-0">@Model.TotalRevenue.ToString("N0") ₺</h3>
+                    </div>
+                    <div class="bg-info bg-opacity-10 rounded-3 p-3"><i class="bi bi-graph-up text-info fs-4"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Toplam Komisyon</p>
+                        <h3 class="mb-0">@Model.TotalCommission.ToString("N0") ₺</h3>
+                        <small class="text-warning">@Model.PendingCommission.ToString("N0") ₺ beklemede</small>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 rounded-3 p-3"><i class="bi bi-cash-stack text-warning fs-4"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h6 class="mb-0"><i class="bi bi-bar-chart"></i> Aylık Satışlarım</h6></div>
+            <div class="card-body"><canvas id="monthlySalesChart" height="200"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h6 class="mb-0"><i class="bi bi-megaphone"></i> Duyurular</h6></div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    @foreach (var ann in Model.Announcements)
+                    {
+                        <li class="list-group-item">
+                            <strong>@ann.Title</strong>
+                            <p class="mb-0 small text-muted">@ann.Content</p>
+                            <small class="text-muted">@ann.CreatedAt.ToString("dd.MM.yyyy")</small>
+                        </li>
+                    }
+                    @if (!Model.Announcements.Any())
+                    {
+                        <li class="list-group-item text-muted text-center py-4">Duyuru bulunmuyor.</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-clock-history"></i> Son Başvurularım</h6>
+        <a asp-controller="DealerApplication" asp-action="Index" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>Başvuru No</th><th>Müşteri</th><th>Ürün</th><th>Durum</th><th>Tarih</th></tr></thead>
+                <tbody>
+                    @foreach (var app in Model.RecentApplications)
+                    {
+                        <tr>
+                            <td><a asp-controller="DealerApplication" asp-action="Detail" asp-route-id="@app.Id">@app.ApplicationNumber</a></td>
+                            <td>@app.CustomerName</td>
+                            <td>@app.ProductName</td>
+                            <td>@Html.Raw(GetBadge(app.Status))</td>
+                            <td>@app.CreatedAt.ToString("dd.MM.yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (Model.Announcements.Any(a => a.IsPopup))
+{
+    <div class="modal fade" id="announcementModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="bi bi-megaphone"></i> Duyuru</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            @foreach (var ann in Model.Announcements.Where(a => a.IsPopup))
+            {
+                <h6>@ann.Title</h6>
+                <p>@ann.Content</p>
+                <hr />
+            }
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Tamam</button></div>
+    </div></div></div>
+}
+
+@functions {
+    string GetBadge(string s) => s switch {
+        "Pending" => "<span class='badge bg-warning'>Beklemede</span>",
+        "InReview" => "<span class='badge bg-info'>İnceleniyor</span>",
+        "Approved" => "<span class='badge bg-primary'>Onaylandı</span>",
+        "Rejected" => "<span class='badge bg-danger'>Reddedildi</span>",
+        "Completed" => "<span class='badge bg-success'>Tamamlandı</span>",
+        "Cancelled" => "<span class='badge bg-secondary'>İptal</span>",
+        _ => $"<span class='badge bg-secondary'>{s}</span>"
+    };
+}
+
+@section Scripts {
+<script>
+new Chart(document.getElementById('monthlySalesChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: [@Html.Raw(string.Join(",", Model.MonthlySales.Select(m => $"'{m.Month}'")))],
+        datasets: [{ label: 'Satış (₺)', data: [@string.Join(",", Model.MonthlySales.Select(m => m.Amount))], backgroundColor: 'rgba(15,76,117,0.7)', borderRadius: 6 }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+});
+@if (Model.Announcements.Any(a => a.IsPopup))
+{
+    <text>new bootstrap.Modal(document.getElementById('announcementModal')).show();</text>
+}
+</script>
+}

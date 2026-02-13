@@ -1,0 +1,10 @@
+@{
+    ViewData["Title"] = "Hata";
+}
+
+<div class="container py-5 text-center">
+    <i class="bi bi-exclamation-triangle text-danger" style="font-size:5rem"></i>
+    <h2 class="mt-3">Hata @(ViewBag.ErrorCode ?? "500")</h2>
+    <p class="text-muted">@(ViewBag.ErrorMessage ?? "Bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.")</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3"><i class="bi bi-house"></i> Ana Sayfaya Dön</a>
+</div>

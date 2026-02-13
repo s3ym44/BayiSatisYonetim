@@ -1,0 +1,104 @@
+@model DealerDetailViewModel
+@{
+    ViewData["Title"] = "Bayi Detay";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-building"></i> @Model.CompanyName</h4>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil"></i> Düzenle</a>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Geri</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white"><h6 class="mb-0">Bayi Bilgileri</h6></div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <tr><td class="text-muted">Yetkili:</td><td><strong>@Model.FullName</strong></td></tr>
+                    <tr><td class="text-muted">E-posta:</td><td>@Model.Email</td></tr>
+                    <tr><td class="text-muted">Telefon:</td><td>@Model.Phone</td></tr>
+                    <tr><td class="text-muted">Vergi No:</td><td>@Model.TaxNumber</td></tr>
+                    <tr><td class="text-muted">Adres:</td><td>@Model.Address</td></tr>
+                    <tr><td class="text-muted">Şehir:</td><td>@Model.City</td></tr>
+                    <tr><td class="text-muted">Banka:</td><td>@(Model.BankName ?? "-")</td></tr>
+                    <tr><td class="text-muted">IBAN:</td><td>@(Model.IBAN ?? "-")</td></tr>
+                    <tr><td class="text-muted">Komisyon:</td><td><strong>%@Model.CommissionRate</strong></td></tr>
+                    <tr>
+                        <td class="text-muted">Durum:</td>
+                        <td>
+                            @switch (Model.Status)
+                            {
+                                case DealerStatus.Pending: <span class="badge bg-warning">Beklemede</span> break;
+                                case DealerStatus.Approved: <span class="badge bg-success">Onaylı</span> break;
+                                case DealerStatus.Rejected: <span class="badge bg-danger">Reddedildi</span> break;
+                                case DealerStatus.Suspended: <span class="badge bg-secondary">Askıda</span> break;
+                            }
+                        </td>
+                    </tr>
+                    <tr><td class="text-muted">Kayıt:</td><td>@Model.CreatedAt.ToString("dd.MM.yyyy")</td></tr>
+                </table>
+
+                @if (Model.Status == DealerStatus.Pending)
+                {
+                    <div class="d-flex gap-2 mt-3">
+                        <form asp-action="Approve" asp-route-id="@Model.Id" method="post">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-success btn-sm"><i class="bi bi-check-circle"></i> Onayla</button>
+                        </form>
+                        <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-danger btn-sm"><i class="bi bi-x-circle"></i> Reddet</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <h4 class="text-primary mb-0">@Model.TotalSales</h4>
+                    <small class="text-muted">Toplam Satış</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <h4 class="text-success mb-0">@Model.TotalRevenue.ToString("N0") ₺</h4>
+                    <small class="text-muted">Toplam Gelir</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <h4 class="text-warning mb-0">@Model.TotalCommission.ToString("N0") ₺</h4>
+                    <small class="text-muted">Toplam Komisyon</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h6 class="mb-0">Son Satışlar</h6></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-light"><tr><th>Başvuru No</th><th>Ürün</th><th>Müşteri</th><th>Tutar</th><th>Komisyon</th><th>Tarih</th></tr></thead>
+                        <tbody>
+                            @foreach (var s in Model.RecentSales)
+                            {
+                                <tr>
+                                    <td>@s.ApplicationNumber</td><td>@s.ProductName</td><td>@s.CustomerName</td>
+                                    <td>@s.Amount.ToString("N0") ₺</td><td>@s.CommissionAmount.ToString("N0") ₺</td>
+                                    <td>@s.SaleDate.ToString("dd.MM.yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
