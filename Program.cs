@@ -11,19 +11,19 @@ var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    // Railway DATABASE_URL formatı: postgresql://user:pass@host:port/dbname
+    Console.WriteLine("Railway PostgreSQL bağlantısı kullanılıyor.");
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
-    var npgsqlConnectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+    var connStr = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
 
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(npgsqlConnectionString));
+        options.UseNpgsql(connStr));
 }
 else
 {
-    // Development: SQLite
+    Console.WriteLine("Lokal SQLite bağlantısı kullanılıyor.");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlite("Data Source=bayisatis_dev.db"));
 }
 
 // Identity
