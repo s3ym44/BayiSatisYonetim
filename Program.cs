@@ -6,19 +6,17 @@ using BayiSatisYonetim.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database - SQLite for Development, PostgreSQL for Production/Docker
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
-var usePostgres = connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase);
-
-if (usePostgres)
+// === DATABASE CONFIGURATION ===
+if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 else
 {
+    var connectionString = GetPostgresConnectionString(builder.Configuration);
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(connectionString));
+        options.UseNpgsql(connectionString));
 }
 
 // Identity
@@ -53,22 +51,26 @@ builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 builder.Services.AddControllersWithViews();
 
+// Railway PORT desteği
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://+:{port}");
+
 var app = builder.Build();
 
-// Seed Data
+// Auto migrate + seed
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        if (usePostgres)
+        var db = services.GetRequiredService<ApplicationDbContext>();
+        if (app.Environment.IsDevelopment())
         {
-            context.Database.Migrate();
+            db.Database.EnsureCreated();
         }
         else
         {
-            context.Database.EnsureCreated();
+            db.Database.Migrate();
         }
         await SeedData.InitializeAsync(services);
     }
@@ -85,7 +87,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -102,3 +107,23 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+// === Helper method: Railway DATABASE_URL parser ===
+static string GetPostgresConnectionString(IConfiguration config)
+{
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL")
+                   ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
+    if (!string.IsNullOrEmpty(databaseUrl))
+    {
+        var uri = new Uri(databaseUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        return $"Host={uri.Host};Port={uri.Port};" +
+               $"Database={uri.AbsolutePath.TrimStart('/')};" +
+               $"Username={userInfo[0]};Password={userInfo[1]};" +
+               $"SSL Mode=Require;Trust Server Certificate=true";
+    }
+
+    return config.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("No connection string found.");
+}
