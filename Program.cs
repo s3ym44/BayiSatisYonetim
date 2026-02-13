@@ -7,16 +7,23 @@ using BayiSatisYonetim.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // === DATABASE CONFIGURATION ===
-if (builder.Environment.IsDevelopment())
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (!string.IsNullOrEmpty(databaseUrl))
 {
+    // Railway DATABASE_URL formatı: postgresql://user:pass@host:port/dbname
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    var npgsqlConnectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseNpgsql(npgsqlConnectionString));
 }
 else
 {
-    var connectionString = GetPostgresConnectionString(builder.Configuration);
+    // Development: SQLite
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
 // Identity
@@ -64,13 +71,13 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = services.GetRequiredService<ApplicationDbContext>();
-        if (app.Environment.IsDevelopment())
+        if (!string.IsNullOrEmpty(databaseUrl))
         {
-            db.Database.EnsureCreated();
+            db.Database.Migrate();
         }
         else
         {
-            db.Database.Migrate();
+            db.Database.EnsureCreated();
         }
         await SeedData.InitializeAsync(services);
     }
@@ -108,22 +115,3 @@ app.MapControllerRoute(
 
 app.Run();
 
-// === Helper method: Railway DATABASE_URL parser ===
-static string GetPostgresConnectionString(IConfiguration config)
-{
-    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL")
-                   ?? Environment.GetEnvironmentVariable("DATABASE_URL");
-
-    if (!string.IsNullOrEmpty(databaseUrl))
-    {
-        var uri = new Uri(databaseUrl);
-        var userInfo = uri.UserInfo.Split(':');
-        return $"Host={uri.Host};Port={uri.Port};" +
-               $"Database={uri.AbsolutePath.TrimStart('/')};" +
-               $"Username={userInfo[0]};Password={userInfo[1]};" +
-               $"SSL Mode=Require;Trust Server Certificate=true";
-    }
-
-    return config.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException("No connection string found.");
-}
